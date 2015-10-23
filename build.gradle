@@ -1,0 +1,39 @@
+apply plugin: MyPlugin
+apply plugin: 'groovy'
+
+
+task wrapper(type: Wrapper) {
+    version = '2.8'
+}
+
+myTask {
+    text 'override' // uncomment to override convention
+}
+
+dependencies {
+    compile gradleApi()
+    compile localGroovy()
+}
+
+class MyPlugin implements Plugin<Project> {
+
+    @Override
+    void apply(Project project) {
+        def t = project.tasks.create('myTask', MyTask)
+        // need to assign a closure for this to work (to support late binding?)
+        t.conventionMapping.text = { 'hello from convention' }
+    }
+
+
+}
+
+class MyTask extends DefaultTask {
+
+    String text
+
+    @TaskAction
+    void action() {
+        // need to use the getter or the convention wouldn't work
+        println getText()
+    }
+}
